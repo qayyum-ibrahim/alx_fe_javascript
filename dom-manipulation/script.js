@@ -154,7 +154,12 @@ function exportToJsonFile() {
 }
 
 async function fetchQuotesFromServer() {
-  await fetch("https://jsonplaceholder.typicode.com/posts")
+  await fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
     .then((res) => res.json())
     .then((data) => {
       const serverQuotes = data.slice(0, 5).map((post) => ({
