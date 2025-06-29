@@ -153,8 +153,8 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-function fetchQuotesFromServer() {
-  fetch("https://jsonplaceholder.typicode.com/posts")
+async function fetchQuotesFromServer() {
+  await fetch("https://jsonplaceholder.typicode.com/posts")
     .then((res) => res.json())
     .then((data) => {
       const serverQuotes = data.slice(0, 5).map((post) => ({
