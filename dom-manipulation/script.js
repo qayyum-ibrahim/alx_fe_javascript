@@ -3,6 +3,7 @@ let quotes = [];
 const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const categorySelect = document.getElementById("categorySelect");
+const categoryFilter = document.getElementById("categoryFilter");
 
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
@@ -27,6 +28,7 @@ function loadQuotes() {
 function saveQuotes() {
   localStorage.setItem("quotes", JSON.stringify(quotes));
   updateCategoryDropdown();
+  populateCategories();
 }
 
 function showRandomQuote() {
@@ -45,7 +47,6 @@ function showRandomQuote() {
   const randomIndex = Math.floor(Math.random() * filteredQuotes.length);
   const quote = filteredQuotes[randomIndex];
   quoteDisplay.textContent = `"${quote.text}" - (${quote.category})`;
-
   sessionStorage.setItem("lastViewedQuote", JSON.stringify(quote));
 }
 
@@ -62,10 +63,8 @@ function createAddQuoteForm() {
 
   quotes.push({ text, category });
   saveQuotes();
-
   textInput.value = "";
   categoryInput.value = "";
-
   alert("Quote added successfully!");
 }
 
@@ -80,34 +79,35 @@ function updateCategoryDropdown() {
   });
 }
 
-function importFromJsonFile(event) {
-  const fileReader = new FileReader();
-  fileReader.onload = function (e) {
-    try {
-      const importedQuotes = JSON.parse(e.target.result);
-      if (!Array.isArray(importedQuotes)) throw new Error("Invalid format");
-
-      quotes.push(...importedQuotes);
-      saveQuotes();
-      alert("Quotes imported successfully!");
-    } catch (err) {
-      alert("Invalid JSON file. Please make sure it’s properly formatted.");
-    }
-  };
-  fileReader.readAsText(event.target.files[0]);
+function populateCategories() {
+  const categories = Array.from(new Set(quotes.map((q) => q.category)));
+  categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+  categories.forEach((cat) => {
+    const option = document.createElement("option");
+    option.value = cat;
+    option.textContent = cat;
+    categoryFilter.appendChild(option);
+  });
 }
 
-function exportToJsonFile() {
-  const dataStr = JSON.stringify(quotes, null, 2);
-  const blob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
+function filterQuotes() {
+  const selectedFilter = categoryFilter.value;
+  localStorage.setItem("lastSelectedFilter", selectedFilter);
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "quotes.json";
-  a.click();
+  const filtered =
+    selectedFilter === "all"
+      ? quotes
+      : quotes.filter((q) => q.category === selectedFilter);
 
-  URL.revokeObjectURL(url);
+  if (filtered.length === 0) {
+    quoteDisplay.textContent = "No quotes available in this category.";
+    return;
+  }
+
+  const randomIndex = Math.floor(Math.random() * filtered.length);
+  const quote = filtered[randomIndex];
+  quoteDisplay.textContent = `"${quote.text}" - (${quote.category})`;
+  sessionStorage.setItem("lastViewedQuote", JSON.stringify(quote));
 }
 
 function showLastViewedQuote() {
@@ -118,6 +118,38 @@ function showLastViewedQuote() {
   } else {
     showRandomQuote();
   }
+
+  const savedFilter = localStorage.getItem("lastSelectedFilter");
+  if (savedFilter) {
+    categoryFilter.value = savedFilter;
+  }
+}
+
+function importFromJsonFile(event) {
+  const fileReader = new FileReader();
+  fileReader.onload = function (e) {
+    try {
+      const importedQuotes = JSON.parse(e.target.result);
+      if (!Array.isArray(importedQuotes)) throw new Error("Invalid format");
+      quotes.push(...importedQuotes);
+      saveQuotes();
+      alert("Quotes imported successfully!");
+    } catch (err) {
+      alert("Invalid JSON file.");
+    }
+  };
+  fileReader.readAsText(event.target.files[0]);
+}
+
+function exportToJsonFile() {
+  const dataStr = JSON.stringify(quotes, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quotes.json";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 newQuoteBtn.addEventListener("click", showRandomQuote);
