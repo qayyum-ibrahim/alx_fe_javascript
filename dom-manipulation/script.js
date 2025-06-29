@@ -153,7 +153,7 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-function syncWithServer() {
+function fetchQuotesFromServer() {
   fetch("https://jsonplaceholder.typicode.com/posts")
     .then((res) => res.json())
     .then((data) => {
@@ -192,5 +192,5 @@ categorySelect.addEventListener("change", showRandomQuote);
 
 loadQuotes();
 showLastViewedQuote();
-syncWithServer();
-setInterval(syncWithServer, 15000);
+fetchQuotesFromServer();
+setInterval(fetchQuotesFromServer, 15000);
