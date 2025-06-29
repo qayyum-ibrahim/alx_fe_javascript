@@ -4,6 +4,7 @@ const quoteDisplay = document.getElementById("quoteDisplay");
 const newQuoteBtn = document.getElementById("newQuote");
 const categorySelect = document.getElementById("categorySelect");
 const categoryFilter = document.getElementById("categoryFilter");
+const notification = document.getElementById("notification");
 
 function loadQuotes() {
   const storedQuotes = localStorage.getItem("quotes");
@@ -152,8 +153,44 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
+function syncWithServer() {
+  fetch("https://jsonplaceholder.typicode.com/posts")
+    .then((res) => res.json())
+    .then((data) => {
+      const serverQuotes = data.slice(0, 5).map((post) => ({
+        text: post.title,
+        category: "Server",
+      }));
+
+      let added = 0;
+      serverQuotes.forEach((serverQuote) => {
+        const exists = quotes.some(
+          (localQuote) =>
+            localQuote.text === serverQuote.text &&
+            localQuote.category === serverQuote.category
+        );
+        if (!exists) {
+          quotes.push(serverQuote);
+          added++;
+        }
+      });
+
+      if (added > 0) {
+        saveQuotes();
+        notification.textContent = `${added} new quotes synced from server.`;
+        setTimeout(() => (notification.textContent = ""), 4000);
+      }
+    })
+    .catch(() => {
+      notification.textContent = "Failed to sync with server.";
+      setTimeout(() => (notification.textContent = ""), 4000);
+    });
+}
+
 newQuoteBtn.addEventListener("click", showRandomQuote);
 categorySelect.addEventListener("change", showRandomQuote);
 
 loadQuotes();
 showLastViewedQuote();
+syncWithServer();
+setInterval(syncWithServer, 15000);
