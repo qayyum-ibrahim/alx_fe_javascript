@@ -197,7 +197,7 @@ function syncQuotes() {
 
       if (added > 0) {
         saveQuotes();
-        notification.textContent = `${added} new quotes synced from server.`;
+        notification.textContent = `${added} Quotes synced with server!`;
         setTimeout(() => (notification.textContent = ""), 4000);
       }
     })
