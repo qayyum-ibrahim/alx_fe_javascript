@@ -179,7 +179,7 @@ async function postQuoteToServer(quote) {
   }).then((res) => res.json());
 }
 
-function syncWithServer() {
+function syncQuotes() {
   fetchQuotesFromServer()
     .then((serverQuotes) => {
       let added = 0;
@@ -212,5 +212,5 @@ categorySelect.addEventListener("change", showRandomQuote);
 
 loadQuotes();
 showLastViewedQuote();
-syncWithServer();
-setInterval(syncWithServer, 15000);
+syncQuotes();
+setInterval(syncQuotes, 15000);
