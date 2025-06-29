@@ -61,9 +61,10 @@ function createAddQuoteForm() {
     alert("Please enter both quote text and category.");
     return;
   }
-
+  const newQuote = { text, category };
   quotes.push({ text, category });
   saveQuotes();
+  postQuoteToServer(newQuote);
   textInput.value = "";
   categoryInput.value = "";
   alert("Quote added successfully!");
@@ -153,20 +154,34 @@ function exportToJsonFile() {
   URL.revokeObjectURL(url);
 }
 
-async function fetchQuotesFromServer() {
-  await fetch("https://jsonplaceholder.typicode.com/posts", {
+function fetchQuotesFromServer() {
+  return fetch("https://jsonplaceholder.typicode.com/posts")
+    .then((res) => res.json())
+    .then((data) => {
+      return data.slice(0, 5).map((post) => ({
+        text: post.title,
+        category: "Server",
+      }));
+    });
+}
+
+async function postQuoteToServer(quote) {
+  return await fetch("https://jsonplaceholder.typicode.com/posts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      const serverQuotes = data.slice(0, 5).map((post) => ({
-        text: post.title,
-        category: "Server",
-      }));
+    body: JSON.stringify({
+      title: quote.text,
+      body: quote.category,
+      userId: 1,
+    }),
+  }).then((res) => res.json());
+}
 
+function syncWithServer() {
+  fetchQuotesFromServer()
+    .then((serverQuotes) => {
       let added = 0;
       serverQuotes.forEach((serverQuote) => {
         const exists = quotes.some(
@@ -197,5 +212,5 @@ categorySelect.addEventListener("change", showRandomQuote);
 
 loadQuotes();
 showLastViewedQuote();
-fetchQuotesFromServer();
-setInterval(fetchQuotesFromServer, 15000);
+syncWithServer();
+setInterval(syncWithServer, 15000);
