@@ -26,6 +26,16 @@
       <button onclick="createAddQuoteForm()">Add Quote</button>
     </div>
 
+    <div style="margin-top: 20px">
+      <input
+        type="file"
+        id="importFile"
+        accept=".json"
+        onchange="importFromJsonFile(event)"
+      />
+      <button onclick="exportToJsonFile()">Export Quotes as JSON</button>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
